@@ -5,21 +5,21 @@
 #include <vector>
 #include <stdexcept>  // for std::out_of_range
 
-// Generic Stack class template using STL vector
+
 template <typename T>
 class Stack {
 private:
-    std::vector<T> elements; // internal storage
+    std::vector<T> elements; 
 
 public:
-    Stack() = default; // ✅ Default constructor
+    Stack() = default; 
 
-    // Push element onto stack
+    
     void push(const T& item) {
         elements.push_back(item);
     }
 
-    // Pop element from stack and return it
+    
     T pop() {
         if (isEmpty()) {
             throw std::out_of_range("Stack is empty!");
@@ -29,7 +29,7 @@ public:
         return item;
     }
 
-    // View top element without removing
+    
     T top() const {
         if (isEmpty()) {
             throw std::out_of_range("Stack is empty!");
@@ -37,17 +37,17 @@ public:
         return elements.back();
     }
 
-    // Check if stack is empty
+    
     bool isEmpty() const {
         return elements.empty();
     }
 
-    // Clear all elements
+    
     void clear() {
         elements.clear();
     }
 
-    // Get number of elements in stack
+    
     size_t size() const {
         return elements.size();
     }

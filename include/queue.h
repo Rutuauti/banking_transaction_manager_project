@@ -3,23 +3,23 @@
 
 #include <iostream>
 #include <queue>
-#include <stdexcept>  // for std::out_of_range
+#include <stdexcept>  
 
-// Generic Queue class template using STL queue
+
 template <typename T>
 class Queue {
 private:
     std::queue<T> elements;
 
 public:
-    Queue() = default; // ✅ Default constructor
+    Queue() = default; 
 
-    // Add element to the queue
+    
     void enqueue(const T& item) {
         elements.push(item);
     }
 
-    // Remove and return front element
+    
     T dequeue() {
         if (isEmpty()) {
             throw std::out_of_range("Queue is empty!");
@@ -29,7 +29,7 @@ public:
         return frontItem;
     }
 
-    // Peek front element without removing it
+    
     T front() const {
         if (isEmpty()) {
             throw std::out_of_range("Queue is empty!");
@@ -37,18 +37,18 @@ public:
         return elements.front();
     }
 
-    // Check if queue is empty
+    
     bool isEmpty() const {
         return elements.empty();
     }
 
-    // Remove all elements
+    
     void clear() {
         while (!elements.empty())
             elements.pop();
     }
 
-    // Get number of elements in the queue
+    
     size_t size() const {
         return elements.size();
     }

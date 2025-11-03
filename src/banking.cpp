@@ -5,17 +5,14 @@
 #include <vector>
 #include <ctime>
 
-// ---------------------------------------------
-// 🔹 Transaction limit tracker for minors (<18)
-// ---------------------------------------------
 
-// Store account ages (set during account creation or loading)
+
 static std::unordered_map<int, int> accountAges;
 
-// Store transaction timestamps for each account
+
 static std::unordered_map<int, std::vector<std::time_t>> accountTransactions;
 
-// Helper: Clean up old timestamps (>24 hours) and return count of remaining
+
 static size_t cleanupOldTransactions(int accNo) {
     auto &times = accountTransactions[accNo];
     std::time_t now = std::time(nullptr);
@@ -30,7 +27,7 @@ static size_t cleanupOldTransactions(int accNo) {
     return times.size();
 }
 
-// Helper: Record a transaction, checking 20/day limit for minors
+
 static bool canRecordTransaction(int accNo) {
     int age = 18; // default
     if (accountAges.count(accNo)) age = accountAges[accNo];
@@ -45,21 +42,17 @@ static bool canRecordTransaction(int accNo) {
         return true;
     }
 
-    // Adults — no limit
+    
     accountTransactions[accNo].push_back(std::time(nullptr));
     return true;
 }
 
-// Optional: helper to set age for account (call from main or account creation)
+
 void setAccountAge(int accNo, int age) {
     accountAges[accNo] = age;
 }
 
-// ---------------------------------------------
-// 🔹 Core Banking Logic
-// ---------------------------------------------
 
-// Deposit funds
 bool Banking::deposit(int accNo, double amount) {
     if (amount <= 0) return false;
     Account* a = findAccount(accNo);
@@ -71,7 +64,7 @@ bool Banking::deposit(int accNo, double amount) {
     return true;
 }
 
-// Withdraw funds
+
 bool Banking::withdraw(int accNo, double amount) {
     if (amount <= 0) return false;
     Account* a = findAccount(accNo);
@@ -83,7 +76,7 @@ bool Banking::withdraw(int accNo, double amount) {
     return true;
 }
 
-// Transfer funds
+
 bool Banking::transfer(int fromAcc, int toAcc, double amount) {
     if (amount <= 0) return false;
     Account* from = findAccount(fromAcc);
@@ -97,13 +90,13 @@ bool Banking::transfer(int fromAcc, int toAcc, double amount) {
     return true;
 }
 
-// Enqueue a transaction
+
 bool Banking::enqueueTransaction(const Transaction& t) {
     queue.enqueue(t);
     return true;
 }
 
-// Process the next transaction from the queue
+
 bool Banking::processNextTransaction(std::string& outMsg) {
     if (queue.isEmpty()) {
         outMsg = "No pending transactions.";
@@ -145,7 +138,7 @@ bool Banking::processNextTransaction(std::string& outMsg) {
     return success;
 }
 
-// Process all queued transactions
+
 void Banking::processAllTransactions() {
     std::string msg;
     while (!queue.isEmpty()) {
@@ -156,7 +149,7 @@ void Banking::processAllTransactions() {
     }
 }
 
-// Undo last transaction
+
 bool Banking::undoLast(std::string& outMsg) {
     if (doneStack.isEmpty()) {
         outMsg = "No transaction to undo.";
@@ -199,7 +192,7 @@ bool Banking::undoLast(std::string& outMsg) {
     return ok;
 }
 
-// Redo last undone transaction
+
 bool Banking::redoLast(std::string& outMsg) {
     if (undoStack.isEmpty()) {
         outMsg = "No transaction to redo.";
@@ -242,7 +235,7 @@ bool Banking::redoLast(std::string& outMsg) {
     return ok;
 }
 
-// Get next account number
+
 int Banking::getNextAccountNumber() const {
     return nextAccountNumber;
 }

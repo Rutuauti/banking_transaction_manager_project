@@ -1,12 +1,7 @@
 #ifndef TRANSACTIONLIST_H
 #define TRANSACTIONLIST_H
 
-// TransactionList.h
-// Robust mini-statement printer that tolerates different Transaction shapes:
-// - Transaction::type may be an enum or a std::string
-// - Transaction may name account/target/amount fields differently
-//
-// It uses simple trait detection (SFINAE) to choose existing members.
+
 
 #include <iostream>
 #include <vector>
@@ -14,9 +9,7 @@
 #include <string>
 #include <type_traits>
 
-// If you have a typeToStr(...) function for your enum, keep it in scope by including transaction.h
-// e.g. #include "transaction.h"
-// But this header works even if transaction.h is slightly different.
+
 #ifdef HAS_TRANSACTION_HEADER
 #include "transaction.h"
 #endif
@@ -38,7 +31,7 @@ struct has_member_type_enum<T, typename std::enable_if<
     !std::is_same<decltype(std::declval<T>().type), std::string>::value
 >::type> : std::true_type {};
 
-// helpers to detect possible account field names
+
 #define DECL_HAS_MEMBER(name) \
 template <typename, typename = void> \
 struct has_member_##name : std::false_type {}; \
@@ -47,8 +40,7 @@ struct has_member_##name<T, typename std::enable_if< \
     !std::is_same<decltype(std::declval<T>().name), void>::value \
 >::type> : std::true_type {};
 
- // We can't use the above macro straightforwardly due to decltype(..., void) issues.
- // Instead write detection templates manually below.
+ 
 
 template <typename, typename = void>
 struct has_accNo : std::false_type {};
@@ -86,7 +78,7 @@ struct has_to_account : std::false_type {};
 template <typename T>
 struct has_to_account<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().to_account), void>::value, void>::type> : std::true_type {};
 
-// amount / amt
+
 template <typename, typename = void>
 struct has_amount : std::false_type {};
 template <typename T>
@@ -97,7 +89,7 @@ struct has_amt : std::false_type {};
 template <typename T>
 struct has_amt<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().amt), void>::value, void>::type> : std::true_type {};
 
-// date and balanceAfter optional members
+
 template <typename, typename = void>
 struct has_date : std::false_type {};
 template <typename T>
@@ -108,20 +100,14 @@ struct has_balanceAfter : std::false_type {};
 template <typename T>
 struct has_balanceAfter<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().balanceAfter), void>::value, void>::type> : std::true_type {};
 
-// ----------------- access helpers -----------------
+
 template <typename T>
 std::string get_type_as_string(const T& tr) {
-    // If type is std::string member
     if constexpr (std::is_same<decltype(tr.type), std::string>::value) {
         return tr.type;
     } else {
-        // try to call a free function typeToStr if available
-        // we use SFINAE to test for it
         using FnType = std::string(*)(decltype(tr.type));
-        // A helper SFINAE: try to call typeToStr(tr.type)
-        // We'll use a lambda and sizeof trick
         #if __cplusplus >= 201103L
-        // C++11+: try expression in decltype
         template <typename U>
         struct has_typeToStr {
             template <typename V>
@@ -134,12 +120,11 @@ std::string get_type_as_string(const T& tr) {
         struct has_typeToStr { static const bool value = false; };
         #endif
 
-        // If typeToStr exists, use it
+        
         #if __cplusplus >= 201103L
         if constexpr (has_typeToStr<decltype(tr.type)>::value) {
             return typeToStr(tr.type);
         } else {
-            // As fallback, try to stream the type to string (if it supports operator<<)
             std::ostringstream oss;
             oss << tr.type;
             return oss.str();
@@ -179,14 +164,14 @@ double get_amount(const T& tr) {
     else return 0.0;
 }
 
-// date (optional)
+// date 
 template <typename T>
 std::string get_date(const T& tr) {
     if constexpr (has_date<T>::value) return tr.date;
     else return std::string("");
 }
 
-// balanceAfter (optional)
+// balanceAfter 
 template <typename T>
 double get_balanceAfter(const T& tr) {
     if constexpr (has_balanceAfter<T>::value) return static_cast<double>(tr.balanceAfter);
@@ -196,7 +181,6 @@ double get_balanceAfter(const T& tr) {
 // ----------------- TransactionList -----------------
 class TransactionList {
 public:
-    // display last N transactions (default 5). Works with many Transaction shapes.
     template <typename Tx>
     static void displayMiniStatement(const std::vector<Tx>& transactions, size_t N = 5) {
         if (transactions.empty()) {

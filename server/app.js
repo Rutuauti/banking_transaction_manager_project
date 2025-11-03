@@ -6,16 +6,16 @@ const fs = require("fs");
 const app = express();
 const PORT = 3000;
 
-// ✅ Middleware
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve GUI files
+
 const guiPath = path.join(__dirname, "../gui");
 app.use(express.static(guiPath));
 
-// ✅ Login Endpoint
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const userFile = path.join(__dirname, "users.json");
@@ -41,12 +41,12 @@ app.post("/api/login", (req, res) => {
   }
 });
 
-// ✅ Default route
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(guiPath, "index.html"));
 });
 
-// ✅ Start server
+
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });

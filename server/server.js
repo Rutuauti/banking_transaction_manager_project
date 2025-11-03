@@ -1,4 +1,4 @@
-// server/server.js — Banking Transaction Manager Backend (with Age-based Daily Transaction Limit)
+
 const express = require("express");
 const fs = require("fs").promises;
 const path = require("path");
@@ -9,11 +9,11 @@ const morgan = require("morgan");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ---------------- MIDDLEWARE ----------------
+
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Enable CORS
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
@@ -22,12 +22,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---------------- PATHS ----------------
+
 const guiPath = path.join(__dirname, "../gui");
 const dataDir = path.join(__dirname, "../data");
 const userFile = path.join(dataDir, "users.json");
 
-// Ensure data directory and file exist
+
 (async () => {
   try {
     await fs.mkdir(dataDir, { recursive: true });
@@ -42,10 +42,10 @@ const userFile = path.join(dataDir, "users.json");
   }
 })();
 
-// ---------------- STATIC FRONTEND ----------------
+
 app.use(express.static(guiPath));
 
-// ---------------- UTILITIES ----------------
+
 async function readUsers() {
   try {
     const data = await fs.readFile(userFile, "utf8");
@@ -64,7 +64,7 @@ async function writeUsers(users) {
   }
 }
 
-// ---------------- PAGE ROUTES ----------------
+
 const pages = ["index", "signup", "forgotpassword", "dashboard"];
 pages.forEach((page) => {
   app.get(`/${page === "index" ? "" : page}`, (_, res) =>
@@ -72,14 +72,14 @@ pages.forEach((page) => {
   );
 });
 
-// ---------------- AUTHENTICATION & SYNC ROUTES ----------------
+
 function addPostRoute(route, handler) {
   app.post(route, handler);
   const short = route.replace(/^\/api/, "");
   if (short !== route) app.post(short, handler);
 }
 
-// ✅ SYNC USERS (localStorage → server)
+// SYNC USERS (localStorage → server)
 addPostRoute("/api/sync-users", async (req, res) => {
   const { users } = req.body;
   if (!Array.isArray(users))
@@ -90,7 +90,7 @@ addPostRoute("/api/sync-users", async (req, res) => {
   res.json({ success: true, message: "Users synced successfully." });
 });
 
-// ✅ SIGNUP (includes AGE)
+// SIGNUP 
 addPostRoute("/api/signup", async (req, res) => {
   const { username, password, age } = req.body;
 
@@ -117,7 +117,7 @@ addPostRoute("/api/signup", async (req, res) => {
   res.json({ success: true, message: "Signup successful." });
 });
 
-// ✅ LOGIN
+// LOGIN
 addPostRoute("/api/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username?.trim() || !password?.trim())
@@ -136,7 +136,7 @@ addPostRoute("/api/login", async (req, res) => {
   res.json({ success: true, username, age: user.age });
 });
 
-// ✅ FORGOT PASSWORD
+// FORGOT PASSWORD
 addPostRoute("/api/forgot-password", async (req, res) => {
   const { username, newPassword } = req.body;
   const users = await readUsers();
@@ -152,19 +152,17 @@ addPostRoute("/api/forgot-password", async (req, res) => {
   res.json({ success: true, message: "Password updated successfully." });
 });
 
-// ✅ DEBUG: View all users
+
 app.get("/api/users", async (_, res) => {
   const users = await readUsers();
   res.json({ success: true, users });
 });
 
-// ---------------- AGE-BASED DAILY TRANSACTION LIMIT ----------------
-// Under 18 → 20 transactions/day
-// 18 or above → 100 transactions/day
+
 const UNDERAGE_LIMIT = 20;
 const DEFAULT_LIMIT = 100;
 
-const transactionTracker = {}; // { username: [timestamps] }
+const transactionTracker = {}; 
 
 async function canTransact(username) {
   const users = await readUsers();
@@ -189,7 +187,7 @@ async function canTransact(username) {
   return true;
 }
 
-// ---------------- C++ BACKEND INTEGRATION ----------------
+
 const exeName =
   process.platform === "win32"
     ? "BankingTransactionManager.exe"
@@ -219,7 +217,7 @@ function runBackendCommand(args, res) {
     });
 }
 
-// ---------------- BANKING ACTION ROUTES ----------------
+
 app.post("/api/deposit", async (req, res) => {
   const { username, amount } = req.body;
   if (!username || isNaN(amount))
@@ -266,12 +264,12 @@ app.post("/api/undo", (_, res) => runBackendCommand(["undo"], res));
 app.post("/api/redo", (_, res) => runBackendCommand(["redo"], res));
 app.get("/api/mini-statement", (_, res) => runBackendCommand(["mini-statement"], res));
 
-// ---------------- DEFAULT HANDLER ----------------
+
 app.use((_, res) =>
   res.status(404).json({ success: false, error: "Endpoint not found." })
 );
 
-// ---------------- START SERVER ----------------
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running at: http://localhost:${PORT}`);
   console.log(`📂 Serving frontend from: ${guiPath}`);

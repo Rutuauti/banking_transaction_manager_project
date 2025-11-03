@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 
-// 💰 Deposit money
+
 void Account::deposit(double amount) {
     if (amount > 0) {
         balance += amount;
@@ -12,7 +12,7 @@ void Account::deposit(double amount) {
     }
 }
 
-// 💸 Withdraw money
+
 bool Account::withdraw(double amount) {
     if (amount <= 0) {
         std::cerr << "⚠️ Invalid withdrawal amount!\n";
@@ -27,7 +27,7 @@ bool Account::withdraw(double amount) {
     return true;
 }
 
-// 📊 Display account info neatly
+
 void Account::display() const {
     std::cout << std::left << std::setw(10) << accNo
               << std::setw(20) << name

@@ -5,19 +5,18 @@
 #include <iostream>
 #include <iomanip>
 
-// 🏦 Represents a single bank account node
 struct Account {
-    int accNo;               // Unique account number
-    std::string name;        // Account holder name
-    double balance;          // Current balance amount
-    int age;                 // 👶 Age of account holder
-    int transactionCount;    // 🔢 Number of transactions done
+    int accNo;               
+    std::string name;        
+    double balance;          
+    int age;                 
+    int transactionCount;    
 
-    // Constructor
+    
     Account(int a = 0, const std::string &n = "", double b = 0.0, int ag = 18)
         : accNo(a), name(n), balance(b), age(ag), transactionCount(0) {}
 
-    // 💰 Deposit money
+    
     void deposit(double amount) {
         if (amount > 0) {
             balance += amount;
@@ -27,7 +26,7 @@ struct Account {
         }
     }
 
-    // 💸 Withdraw money (with safety check)
+    
     bool withdraw(double amount) {
         if (amount <= 0) {
             std::cerr << "⚠️ Invalid withdrawal amount!\n";
@@ -42,7 +41,7 @@ struct Account {
         return true;
     }
 
-    // 📊 Display account info neatly
+    
     void display() const {
         std::cout << std::left 
                   << std::setw(20) << name
@@ -53,11 +52,11 @@ struct Account {
                   << "\n";
     }
 
-    // ⚙️ Getters
+    
     int getAge() const { return age; }
     int getTransactionCount() const { return transactionCount; }
 
-    // 🧮 Increment transaction count (if needed manually)
+    
     void incrementTransactionCount() { transactionCount++; }
 };
 

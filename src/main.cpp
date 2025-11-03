@@ -10,7 +10,7 @@
 
 using namespace std;
 
-// ✅ Transaction struct
+
 struct Transaction {
     string type;
     double amount;
@@ -18,7 +18,7 @@ struct Transaction {
     string date;
 };
 
-// ✅ Utility: current timestamp
+
 string currentDateTime() {
     time_t now = time(0);
     char buf[80];
@@ -26,7 +26,7 @@ string currentDateTime() {
     return buf;
 }
 
-// ✅ Save transactions to file
+
 void saveTransactionsToFile(const string& username, const vector<Transaction>& transactions) {
     ofstream file(username + "_transactions.txt", ios::trunc);
     for (const auto& txn : transactions) {
@@ -35,7 +35,7 @@ void saveTransactionsToFile(const string& username, const vector<Transaction>& t
     file.close();
 }
 
-// ✅ Load transactions from file
+
 vector<Transaction> loadTransactionsFromFile(const string& username) {
     vector<Transaction> transactions;
     ifstream file(username + "_transactions.txt");
@@ -55,13 +55,13 @@ vector<Transaction> loadTransactionsFromFile(const string& username) {
     return transactions;
 }
 
-// ✅ Get last balance
+
 double getBalance(const vector<Transaction>& transactions) {
     if (transactions.empty()) return 0.0;
     return transactions.back().balanceAfter;
 }
 
-// ✅ Print mini-statement (for backend output)
+
 void printMiniStatement(const vector<Transaction>& transactions) {
     cout << left << setw(20) << "Date" << setw(15) << "Type"
          << setw(15) << "Amount" << setw(15) << "Balance" << "\n";
@@ -76,7 +76,7 @@ void printMiniStatement(const vector<Transaction>& transactions) {
 }
 
 int main(int argc, char* argv[]) {
-    // ✅ If called by Node backend (API mode)
+    
     if (argc > 1) {
         string command = argv[1];
 
@@ -117,7 +117,6 @@ int main(int argc, char* argv[]) {
         else if (command == "transfer" && argc == 5) {
             string fromUser = argv[2], toUser = argv[3];
             double amount = stod(argv[4]);
-
             auto fromTxns = loadTransactionsFromFile(fromUser);
             auto toTxns = loadTransactionsFromFile(toUser);
             double fromBal = getBalance(fromTxns);
@@ -154,7 +153,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ✅ Interactive console mode (for testing)
+    
     string username;
     cout << "Enter username: ";
     cin >> username;
