@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Banking Transaction Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a23, #1b1b3a);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: rgba(0, 234, 255, 0.1);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+    }
+    h2 {
+      color: #00eaff;
+      text-shadow: 0 0 10px rgba(0, 234, 255, 0.6);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 25px;
+      width: 400px;
+      text-align: center;
+      margin: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      transition: 0.3s;
+    }
+    .card:hover { transform: scale(1.03); }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-align: center;
+      outline: none;
+    }
+    button {
+      background-color: #00eaff;
+      color: #0a0a23;
+      font-weight: 600;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.6);
+    }
+    button:hover {
+      background-color: #00bcd4;
+      transform: scale(1.05);
+    }
+    table {
+      width: 90%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px;
+      text-align: center;
+    }
+    .logout {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    .logout:hover {
+      background-color: #ff3333;
+      transform: scale(1.05);
+    }
+    .actions button {
+      margin: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h2>💳 Banking Transaction Manager</h2>
+    <p id="welcomeUser"></p>
+    <p id="transactionLimitMsg" style="color: #ffcc00; font-weight: 500;"></p>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h3>Account Balance</h3>
+      <h2 id="balance">₹0.00</h2>
+      <div class="actions">
+        <button onclick="undo()">↩️ Undo</button>
+        <button onclick="redo()">↪️ Redo</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Deposit / Withdraw</h3>
+      <input type="number" id="amount" placeholder="Enter amount" />
+      <div class="actions">
+        <button onclick="deposit()">Deposit</button>
+        <button onclick="withdraw()">Withdraw</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Transfer Money</h3>
+      <input type="text" id="targetUser" placeholder="Recipient username" />
+      <input type="number" id="transferAmount" placeholder="Amount to transfer" />
+      <button onclick="transfer()">Transfer</button>
+    </div>
+
+    <div class="card">
+      <h3>Mini Statement (Last 5)</h3>
+      <table id="statement">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Target</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <script>
+    let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!loggedInUser) {
+      alert('Please login first!');
+      window.location.href = 'index.html';
+    }
+
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    let user = users.find(u => u.username === loggedInUser.username);
+
+    if (!user.age) user.age = 18;
+
+    // Only users below 18 have daily limit = 20
+    let DAILY_LIMIT = user.age < 18 ? 20 : Infinity;
+
+    if (!user.balance) user.balance = 0;
+    if (!user.transactions) user.transactions = [];
+    if (!user.transactionDates) user.transactionDates = {};
+
+    let undoStack = [];
+    let redoStack = [];
+
+    document.getElementById('welcomeUser').textContent = `Welcome, ${user.username} 👋 (Age: ${user.age})`;
+    updateBalance();
+    updateStatement();
+    updateLimitMessage();
+
+    function getDateKey() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function canTransact() {
+      if (user.age >= 18) return true; // no limit
+      const today = getDateKey();
+      const count = user.transactionDates[today] || 0;
+      return count < DAILY_LIMIT;
+    }
+
+    function recordTransactionCount() {
+      if (user.age >= 18) return; // no tracking for adults
+      const today = getDateKey();
+      user.transactionDates[today] = (user.transactionDates[today] || 0) + 1;
+      saveUserData();
+      updateLimitMessage();
+    }
+
+    function updateLimitMessage() {
+      if (user.age >= 18) {
+        document.getElementById('transactionLimitMsg').textContent = 'No daily transaction limit ✅';
+        return;
+      }
+      const today = getDateKey();
+      const count = user.transactionDates[today] || 0;
+      document.getElementById('transactionLimitMsg').textContent =
+        `Today's transactions: ${count}/${DAILY_LIMIT}`;
+    }
+
+    function saveUserData() {
+      const idx = users.findIndex(u => u.username === user.username);
+      if (idx !== -1) users[idx] = user;
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+    }
+
+    function updateBalance() {
+      document.getElementById('balance').textContent = `₹${user.balance.toFixed(2)}`;
+      saveUserData();
+    }
+
+    function addTransaction(type, amount, target = '-') {
+      const tx = { type, amount, target, date: new Date().toLocaleString() };
+      user.transactions.push(tx);
+      if (user.transactions.length > 50) user.transactions.shift();
+      updateStatement();
+    }
+
+    function updateStatement() {
+      const tbody = document.querySelector('#statement tbody');
+      tbody.innerHTML = '';
+      const recent = user.transactions.slice(-5).reverse();
+      for (const tx of recent) {
+        const row = `<tr><td>${tx.type}</td><td>₹${tx.amount}</td><td>${tx.target}</td></tr>`;
+        tbody.innerHTML += row;
+      }
+      updateBalance();
+    }
+
+    function deposit() {
+      if (!canTransact()) return alert("⚠️ Daily transaction limit reached!");
+      const amount = parseFloat(document.getElementById('amount').value);
+      if (isNaN(amount) || amount <= 0) return alert('Enter valid amount!');
+      user.balance += amount;
+      undoStack.push({ action: 'deposit', amount });
+      redoStack = [];
+      recordTransactionCount();
+      addTransaction('Deposit', amount);
+      updateBalance();
+      document.getElementById('amount').value = '';
+    }
+
+    function withdraw() {
+      if (!canTransact()) return alert("⚠️ Daily transaction limit reached!");
+      const amount = parseFloat(document.getElementById('amount').value);
+      if (isNaN(amount) || amount <= 0) return alert('Enter valid amount!');
+      if (amount > user.balance) return alert('Insufficient balance!');
+      user.balance -= amount;
+      undoStack.push({ action: 'withdraw', amount });
+      redoStack = [];
+      recordTransactionCount();
+      addTransaction('Withdraw', amount);
+      updateBalance();
+      document.getElementById('amount').value = '';
+    }
+
+    function transfer() {
+      if (!canTransact()) return alert("⚠️ Daily transaction limit reached!");
+      const targetUser = document.getElementById('targetUser').value.trim();
+      const amount = parseFloat(document.getElementById('transferAmount').value);
+      if (!targetUser || isNaN(amount) || amount <= 0) return alert('Enter valid details!');
+      const target = users.find(u => u.username === targetUser);
+      if (!target) return alert('Recipient not found!');
+      if (amount > user.balance) return alert('Insufficient balance!');
+
+      user.balance -= amount;
+      target.balance = (target.balance || 0) + amount;
+
+      undoStack.push({ action: 'transfer', amount, targetUser });
+      redoStack = [];
+      recordTransactionCount();
+
+      addTransaction('Transfer Out', amount, targetUser);
+      if (!target.transactions) target.transactions = [];
+      target.transactions.push({ type: 'Transfer In', amount, target: user.username, date: new Date().toLocaleString() });
+
+      saveUserData();
+      updateStatement();
+      document.getElementById('targetUser').value = '';
+      document.getElementById('transferAmount').value = '';
+    }
+
+    function undo() {
+      if (undoStack.length === 0) return alert('No actions to undo!');
+      const last = undoStack.pop();
+      redoStack.push(last);
+
+      if (last.action === 'deposit') {
+        user.balance -= last.amount;
+        addTransaction('Undo Deposit', last.amount);
+      } else if (last.action === 'withdraw') {
+        user.balance += last.amount;
+        addTransaction('Undo Withdraw', last.amount);
+      } else if (last.action === 'transfer') {
+        const target = users.find(u => u.username === last.targetUser);
+        if (target && target.balance >= last.amount) {
+          user.balance += last.amount;
+          target.balance -= last.amount;
+          addTransaction('Undo Transfer', last.amount, last.targetUser);
+        }
+      }
+      saveUserData();
+      updateStatement();
+    }
+
+    function redo() {
+      if (redoStack.length === 0) return alert('No actions to redo!');
+      const action = redoStack.pop();
+      undoStack.push(action);
+
+      if (action.action === 'deposit') {
+        user.balance += action.amount;
+        addTransaction('Redo Deposit', action.amount);
+      } else if (action.action === 'withdraw') {
+        user.balance -= action.amount;
+        addTransaction('Redo Withdraw', action.amount);
+      } else if (action.action === 'transfer') {
+        const target = users.find(u => u.username === action.targetUser);
+        if (target) {
+          user.balance -= action.amount;
+          target.balance += action.amount;
+          addTransaction('Redo Transfer', action.amount, action.targetUser);
+        }
+      }
+      saveUserData();
+      updateStatement();
+    }
+
+    function logout() {
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

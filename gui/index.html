@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Banking Transaction Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a23, #1b1b3a);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      color: #00eaff;
+      font-weight: 600;
+      margin-bottom: 25px;
+      text-shadow: 0 0 10px rgba(0, 234, 255, 0.6);
+    }
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      text-align: center;
+      transition: 0.3s;
+    }
+    input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+    }
+    input::placeholder { color: #ccc; }
+    button {
+      background-color: #00eaff;
+      color: #0a0a23;
+      font-weight: 600;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.3s ease;
+      width: 95%;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.6);
+    }
+    button:hover {
+      background-color: #00bcd4;
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(0, 234, 255, 0.9);
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+      min-height: 18px;
+      transition: 0.3s ease;
+    }
+    .error { color: #ff8080; }
+    .success { color: #00ffcc; }
+    p { margin-top: 15px; font-size: 14px; }
+    a {
+      color: #00eaff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Welcome Back 👋</h2>
+    <form id="loginForm" autocomplete="off">
+      <input type="text" id="username" placeholder="Username" required autocomplete="new-username" />
+      <input type="password" id="password" placeholder="Password" required autocomplete="new-password" />
+      <button type="submit">Login</button>
+    </form>
+
+```
+<p class="message" id="message"></p>
+
+<p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+<p><a href="#">Forgot Password?</a></p>
+```
+
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const message = document.getElementById('message');
+
+      message.textContent = '';
+      message.className = 'message';
+
+      // 🔹 Retrieve existing users from localStorage
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const user = users.find(u => u.username === username && u.password === password);
+
+      if (user) {
+        // 🔹 Save session
+        localStorage.setItem('loggedInUser', JSON.stringify({
+          username: user.username,
+          balance: user.balance || 0,
+          loginTime: new Date().toISOString()
+        }));
+
+        message.textContent = "✅ Login successful! Redirecting...";
+        message.classList.add('success');
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+      } else {
+        message.textContent = "❌ Invalid username or password";
+        message.classList.add('error');
+      }
+    });
+  </script>
+
+</body>
+</html>

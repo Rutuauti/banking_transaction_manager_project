@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Banking Transaction Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a23, #1b1b3a);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      color: #00eaff;
+      font-weight: 600;
+      margin-bottom: 25px;
+      text-shadow: 0 0 10px rgba(0, 234, 255, 0.6);
+    }
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      text-align: center;
+      transition: 0.3s;
+    }
+    input:focus {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+    }
+    input::placeholder { color: #ccc; }
+    button {
+      background-color: #00eaff;
+      color: #0a0a23;
+      font-weight: 600;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: 0.3s ease;
+      width: 95%;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.6);
+    }
+    button:hover {
+      background-color: #00bcd4;
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(0, 234, 255, 0.9);
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+      min-height: 18px;
+    }
+    .error { color: #ff8080; }
+    .success { color: #00ffcc; }
+    p { margin-top: 15px; font-size: 14px; }
+    a {
+      color: #00eaff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Create Account 🏦</h2>
+    <form id="signupForm" autocomplete="off">
+      <input type="text" id="username" placeholder="Enter your name" autocomplete="new-username" required>
+      <input type="number" id="age" placeholder="Enter your age" autocomplete="off" required>
+      <input type="password" id="password" placeholder="Enter password" autocomplete="new-password" required>
+      <input type="password" id="confirmPassword" placeholder="Confirm password" autocomplete="new-password" required>
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p class="message" id="message"></p>
+    <p>Already have an account? <a href="index.html">Login</a></p>
+  </div>
+
+  <script>
+    // 🟢 Auto-fill default credentials for Rutuja
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("username").value = "Rutuja";
+      document.getElementById("age").value = 20;
+      document.getElementById("password").value = "rutuja123";
+      document.getElementById("confirmPassword").value = "rutuja123";
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const age = parseInt(document.getElementById('age').value);
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      const message = document.getElementById('message');
+
+      message.textContent = '';
+      message.className = 'message';
+
+      if (!username || !password || !confirmPassword || !age) {
+        message.textContent = "⚠️ All fields are required!";
+        message.classList.add('error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        message.textContent = "❌ Passwords do not match!";
+        message.classList.add('error');
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+
+      if (users.some(u => u.username === username)) {
+        message.textContent = "⚠️ Username already exists!";
+        message.classList.add('error');
+        return;
+      }
+
+      const newUser = {
+        username,
+        password,
+        age,
+        balance: 0,
+        transactions: []
+      };
+
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      message.textContent = "✅ Account created successfully! Redirecting...";
+      message.classList.add('success');
+
+      setTimeout(() => window.location.href = 'index.html', 1500);
+    });
+  </script>
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const fields = ["username", "age", "password", "confirmPassword"];
+    fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+[
+  {
+    "username": "rutuja",
+    "password": "1234"
+  },
+  {
+    "username": "admin",
+    "password": "admin123"
+  },
+  {
+    "username": "Vaishnavi",
+    "password": "$2b$10$MsQIQcYnivcgKEw6OzNYyOcgfLFjmXmnlxaz2o1NjLeqjfnWCdf3O",
+    "createdAt": "2025-11-02T19:02:18.590Z",
+    "balance": 0
+  },
+  {
+    "username": "Rutuja",
+    "password": "$2b$10$vHY.VjvT0BEnrqH.OyROW.bdp7oXIDIK/4cdNNSWowZboribnogK2",
+    "createdAt": "2025-11-02T19:41:49.774Z",
+    "balance": 0
+  },
+  {
+    "username": "Disha",
+    "password": "$2b$10$lAuYS6V3WMJGAlSZRzV1L.jMOVCLVPxFvjM2ZaQzjY8fc.8cy5Fz.",
+    "createdAt": "2025-11-02T19:43:07.777Z",
+    "balance": 0
+  }
+]
