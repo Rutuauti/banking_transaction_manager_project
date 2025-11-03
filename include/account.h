@@ -44,7 +44,7 @@ struct Account {
 
     // 📊 Display account info neatly
     void display() const {
-        std::cout << std::left << std::setw(10) << accNo
+        std::cout << std::left 
                   << std::setw(20) << name
                   << std::setw(8)  << age
                   << "₹" << std::fixed << std::setprecision(2)
