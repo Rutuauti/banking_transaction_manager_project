@@ -105,14 +105,6 @@
   </div>
 
   <script>
-    // 🟢 Auto-fill default credentials for Rutuja
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("username").value = "Rutuja";
-      document.getElementById("age").value = 20;
-      document.getElementById("password").value = "rutuja123";
-      document.getElementById("confirmPassword").value = "rutuja123";
-    });
-
     document.getElementById('signupForm').addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -139,18 +131,23 @@
 
       let users = JSON.parse(localStorage.getItem('users')) || [];
 
-      if (users.some(u => u.username === username)) {
+      
+      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
         message.textContent = "⚠️ Username already exists!";
         message.classList.add('error');
         return;
       }
+
+      
+      const transactionLimit = age < 18 ? 18 : Infinity;
 
       const newUser = {
         username,
         password,
         age,
         balance: 0,
-        transactions: []
+        transactions: [],
+        transactionLimit
       };
 
       users.push(newUser);
@@ -162,14 +159,15 @@
       setTimeout(() => window.location.href = 'index.html', 1500);
     });
   </script>
+
+  
   <script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const fields = ["username", "age", "password", "confirmPassword"];
-    fields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
-});
-</script>
+    window.addEventListener("DOMContentLoaded", () => {
+      ["username", "age", "password", "confirmPassword"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+    });
+  </script>
 </body>
 </html>

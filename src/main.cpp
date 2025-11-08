@@ -7,6 +7,8 @@
 #include "stack.h"
 #include "queue.h"
 #include "TransactionList.h"
+#include <algorithm>
+#include <cctype>
 
 using namespace std;
 
@@ -17,6 +19,13 @@ struct Transaction {
     double balanceAfter;
     string date;
 };
+
+string toLower(const string &str) {
+    string lowerStr = str;
+    transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
+              [](unsigned char c){ return tolower(c); });
+    return lowerStr;
+}
 
 
 string currentDateTime() {
@@ -82,6 +91,7 @@ int main(int argc, char* argv[]) {
 
         if (command == "deposit" && argc == 4) {
             string username = argv[2];
+            username = toLower(username);
             double amount = stod(argv[3]);
             auto transactions = loadTransactionsFromFile(username);
             double balance = getBalance(transactions) + amount;
@@ -96,6 +106,7 @@ int main(int argc, char* argv[]) {
 
         else if (command == "withdraw" && argc == 4) {
             string username = argv[2];
+            username = toLower(username);
             double amount = stod(argv[3]);
             auto transactions = loadTransactionsFromFile(username);
             double balance = getBalance(transactions);
@@ -115,7 +126,10 @@ int main(int argc, char* argv[]) {
         }
 
         else if (command == "transfer" && argc == 5) {
-            string fromUser = argv[2], toUser = argv[3];
+            string fromUser = argv[2];
+            string fromUser = toLower(argv[2]);
+            string toUser = argv[3];
+            string toUser = toLower(argv[3]);
             double amount = stod(argv[4]);
             auto fromTxns = loadTransactionsFromFile(fromUser);
             auto toTxns = loadTransactionsFromFile(toUser);
@@ -157,6 +171,8 @@ int main(int argc, char* argv[]) {
     string username;
     cout << "Enter username: ";
     cin >> username;
+    username = toLower(username); 
+
 
     auto transactions = loadTransactionsFromFile(username);
     double balance = getBalance(transactions);

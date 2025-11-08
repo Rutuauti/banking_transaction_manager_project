@@ -50,7 +50,7 @@ private:
 
 public:
     
-    DailyTransactionTracker(int limit = 5) : maxTransactions(limit) {}
+    DailyTransactionTracker(int limit = 20) : maxTransactions(limit) {}
 
     
     void setLimit(int limit) {

@@ -1,4 +1,3 @@
-
 const express = require("express");
 const fs = require("fs").promises;
 const path = require("path");
@@ -9,10 +8,8 @@ const morgan = require("morgan");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
 app.use(express.json());
 app.use(morgan("dev"));
-
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -22,11 +19,9 @@ app.use((req, res, next) => {
   next();
 });
 
-
 const guiPath = path.join(__dirname, "../gui");
 const dataDir = path.join(__dirname, "../data");
 const userFile = path.join(dataDir, "users.json");
-
 
 (async () => {
   try {
@@ -42,9 +37,7 @@ const userFile = path.join(dataDir, "users.json");
   }
 })();
 
-
 app.use(express.static(guiPath));
-
 
 async function readUsers() {
   try {
@@ -64,14 +57,12 @@ async function writeUsers(users) {
   }
 }
 
-
 const pages = ["index", "signup", "forgotpassword", "dashboard"];
 pages.forEach((page) => {
   app.get(`/${page === "index" ? "" : page}`, (_, res) =>
     res.sendFile(path.join(guiPath, `${page}.html`))
   );
 });
-
 
 function addPostRoute(route, handler) {
   app.post(route, handler);
@@ -90,11 +81,13 @@ addPostRoute("/api/sync-users", async (req, res) => {
   res.json({ success: true, message: "Users synced successfully." });
 });
 
-// SIGNUP 
+// SIGNUP (case-insensitive username)
 addPostRoute("/api/signup", async (req, res) => {
-  const { username, password, age } = req.body;
+  const username = req.body.username?.trim().toLowerCase();
+  const password = req.body.password?.trim();
+  const age = req.body.age;
 
-  if (!username?.trim() || !password?.trim() || !age)
+  if (!username || !password || !age)
     return res.status(400).json({ success: false, error: "All fields required." });
 
   const users = await readUsers();
@@ -117,10 +110,11 @@ addPostRoute("/api/signup", async (req, res) => {
   res.json({ success: true, message: "Signup successful." });
 });
 
-// LOGIN
+// LOGIN (case-insensitive username)
 addPostRoute("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username?.trim() || !password?.trim())
+  const username = req.body.username?.trim().toLowerCase();
+  const password = req.body.password?.trim();
+  if (!username || !password)
     return res.status(400).json({ success: false, error: "All fields required." });
 
   const users = await readUsers();
@@ -136,9 +130,11 @@ addPostRoute("/api/login", async (req, res) => {
   res.json({ success: true, username, age: user.age });
 });
 
-// FORGOT PASSWORD
+// FORGOT PASSWORD (case-insensitive username)
 addPostRoute("/api/forgot-password", async (req, res) => {
-  const { username, newPassword } = req.body;
+  const username = req.body.username?.trim().toLowerCase();
+  const newPassword = req.body.newPassword;
+
   const users = await readUsers();
   const idx = users.findIndex((u) => u.username === username);
 
@@ -152,17 +148,15 @@ addPostRoute("/api/forgot-password", async (req, res) => {
   res.json({ success: true, message: "Password updated successfully." });
 });
 
-
 app.get("/api/users", async (_, res) => {
   const users = await readUsers();
   res.json({ success: true, users });
 });
 
-
 const UNDERAGE_LIMIT = 20;
 const DEFAULT_LIMIT = 100;
 
-const transactionTracker = {}; 
+const transactionTracker = {};
 
 async function canTransact(username) {
   const users = await readUsers();
@@ -186,7 +180,6 @@ async function canTransact(username) {
   console.log(`📊 ${username}: ${transactionTracker[username].length}/${limit} today`);
   return true;
 }
-
 
 const exeName =
   process.platform === "win32"
@@ -216,7 +209,6 @@ function runBackendCommand(args, res) {
       });
     });
 }
-
 
 app.post("/api/deposit", async (req, res) => {
   const { username, amount } = req.body;
@@ -264,11 +256,9 @@ app.post("/api/undo", (_, res) => runBackendCommand(["undo"], res));
 app.post("/api/redo", (_, res) => runBackendCommand(["redo"], res));
 app.get("/api/mini-statement", (_, res) => runBackendCommand(["mini-statement"], res));
 
-
 app.use((_, res) =>
   res.status(404).json({ success: false, error: "Endpoint not found." })
 );
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at: http://localhost:${PORT}`);
